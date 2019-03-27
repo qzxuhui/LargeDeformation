@@ -1,0 +1,4 @@
+/document/*.pdf
+/document/*.aux
+/document/*.log
+/document/*.gz

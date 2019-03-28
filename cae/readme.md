@@ -1,2 +1,3 @@
 2d_block_compress_neohookean_abaqus.cae
-使用abaqus内置的 Neo-Hookean 本构模型求解二维平面压缩问题，在大约50%左右出现失稳。
+using abaqus build in Neo-Hookean model solve plane strain 2D block compress problem. the CPE6MH element is used.
+the displacement load is 0.5, at t=0.91 (strain almost at 46%) the system generate negative eigen value. 

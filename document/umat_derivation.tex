@@ -1,0 +1,127 @@
+% !TEX program = xelatex
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage[margin=1in]{geometry}
+\usepackage{float}
+\usepackage{amsfonts,amssymb} 
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{color}
+
+\title{Neo Hookean UMAT推导}
+\author{徐辉}
+\begin{document}
+\maketitle
+\section{符号说明}
+下面列出推导中常用的变量转化关系和符号说明:
+
+变形梯度
+$$\bm{F}=\frac{\partial \bm{x}}{ \partial \bm{X}}$$
+
+左Cauchy Green变形张量
+$$\bm{B}= \bm{F} \cdot \bm{F}^{\rm T}$$
+
+右Cauchy Green变形张量
+$$\bm{C}=\bm{F}^{\rm T}\cdot \bm{F}$$
+
+PK-2应力
+$$\bm{S}$$
+
+Cauchy应力
+$$\bm{\sigma}=\frac{1}{J}\bm{F}\cdot \bm{S} \cdot \bm{F}^{\rm T}$$
+
+Kirchhoff应力
+$$\bm{\tau}=J\bm{\sigma}$$
+材料的Jacobian满足
+$$\delta(J\bm{\sigma})=J\mathbb{C}\cdot \delta \bm{D}$$
+
+虚变形率
+$$\delta \bm{D}={\rm sym}(\delta \bm{F}\cdot \bm{F}^{-1})$$
+
+不变量求导
+$$\frac{\partial I_3}{\partial \bm{A}}=\bm{A}^{\rm -T}\quad \frac{\partial I_3}{\partial A_{ij}}=I_3 A_{ji}^{-1}$$
+
+\section{基本推导}
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial B_{ij}}{\partial F_{kl}} & =\frac{\partial (F_{im}F_{mj}^T)}{\partial F_{kl}}=\frac{\partial (F_{im}F_{jm})}{\partial F_{kl}}
+        =\frac{\partial F_{im}}{\partial F_{kl}}F_{jm} +F_{im} \frac{\partial F_{jm}}{\partial F_{kl}}                                               \\
+                                                & =\delta_{ik}\delta_{ml}F_{jm}+\delta_{jk}\delta_{ml}F_{im}                                         \\
+                                                & =\delta_{ik}F_{jl}+\delta_{jk}F_{il}
+    \end{aligned}
+\end{equation*}
+$$\frac{\partial \ln J}{\partial F_{kl}}=\frac{1}{J}\frac{\partial J}{\partial F_{kl}}=\frac{1}{J}(JF_{lk}^{-1})=F_{lk}^{-1}$$
+\section{材料Jacobian}
+
+虚变形率表达式带入到材料的Jacobian中，写成分量形式有
+$$\delta(J\sigma_{ij})=J \mathbb{C}_{ijkl}\ {\rm sym} (\delta F_{km}F_{ml}^{-1})$$
+在计算$\mathbb{C}$的时候，需要对变形率进行求导。首先暂时忽略$\delta \bm{D}$的对称性，然后将计算结果对称化保证对称性。先暂时忽略对称性，有
+$$\delta(J\sigma_{ij})=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}$$
+进行如下操作(??)
+\begin{equation*}
+    \begin{aligned}
+        \delta(J\sigma_{ij})&=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}             \\
+        \delta(J\sigma_{ij})F_{lp}&=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}F_{lp} \\
+        \delta(J\sigma_{ij})F_{lp}&=J \mathbb{C}_{ijkl} \delta F_{km}\delta_{mp}             \\
+        \delta(J\sigma_{ij})F_{lm}&=J \mathbb{C}_{ijkl} \delta F_{km}                  \\
+    \end{aligned}
+\end{equation*}
+移项有
+$$\mathbb{C}_{ijkl}=\frac{1}{J}\frac{\partial(J\sigma_{ij})}{\partial F_{km}}F_{lm}$$
+强制保证$\mathbb{C}$的对称性，有
+$$\mathbb{C}_{ijkl}=\frac{1}{2J}\left(\frac{\partial(J\sigma_{ij})}{\partial F_{km}}F_{lm} + \frac{\partial(J\sigma_{ij})}{\partial F_{lm}}F_{km} \right)$$
+
+\section{Abaqus Neo-Hookean模型推导}
+
+Abaqus超弹性neo-hookean模型应变能函数\cite{abaqus}
+$$U=C_{10}(\bar{I}_1-3)+\frac{1}{D_1}(J-1)^2$$
+Cauchy应力为
+$$\sigma_{ij}=\frac{2}{J}C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})+\frac{2}{D_1}(J-1)\delta_{ij}$$
+因此
+$$J\sigma_{ij}=2C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})+\frac{2}{D_1}(J^2-J)\delta_{ij}$$
+
+计算第一部分
+$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial}{\partial F_{km}}\left(2C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})\right)=\cdots$$
+
+计算第二部分
+$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial}{\partial F_{km}}\left(\frac{2}{D_1}(J^2-J)\delta_{ij}\right)=\cdots$$
+
+
+\section{分子链 Neo-Hookean模型推导}
+基于分子链模型应变能函数
+$$U=\frac{1}{2}\mu_0({\rm trace}(\bm{C})-3)-\mu_0 \ln J+\frac{1}{2}\lambda_0(\ln J)^2$$
+Kirchhoff应力为\cite{bely}(5.4.55)
+$$\bm{\tau}=\mu_0(\bm{B}-\bm{I}) + \lambda_0 \ln J \bm{I}$$
+写作分量形式为
+$$\tau_{ij}=\mu_0(B_{ij}-\delta_{ij}) + \lambda_0 \ln J \delta_{ij}$$
+Cauchy应力为
+$$\bm{\sigma}=\frac{\tau}{J}=\frac{\mu_0}{J}(\bm{B}-\bm{I}) + \frac{\lambda_0}{J} \ln J \bm{I}$$
+写作分量形式为
+$$\sigma_{ij}=\frac{\mu_0}{J}(B_{ij}-\delta_{ij}) + \frac{\lambda_0}{J} \ln J \delta_{ij}$$
+计算材料的Jacobian
+$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial \tau_{ij}}{\partial F_{km}}=\mu_0(\delta_{ik}F_{jm}+\delta_{jk}F_{im}) + \lambda_0\delta_{ij}F_{mk}^{-1}$$
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial (J\sigma_{ij})}{\partial F_{km}}F_{lm} & =\mu_0(\delta_{ik}F_{jm}F_{lm}+\delta_{jk}F_{im}F_{lm}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm} \\
+                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm}
+    \end{aligned}
+\end{equation*}
+同理有
+\begin{equation*}
+    \begin{aligned}
+        \frac{\partial (J\sigma_{ij})}{\partial F_{lm}}F_{km} & =\mu_0(\delta_{il}B_{jk}+\delta_{jl}B_{ik}) + \lambda_0\delta_{ij}F_{ml}^{-1}F_{km}
+    \end{aligned}
+\end{equation*}
+可以得到材料的Jacobian
+$$\mathbb{C}_{ijkl}=\frac{1}{2J}\left(\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}+\delta_{il}B_{jk}+\delta_{jl}B_{ik}) +\lambda_0\delta_{ij}(F_{mk}^{-1}F_{lm}+F_{ml}^{-1}F_{km}) \right)$$
+
+
+
+\begin{thebibliography}{1}
+    \bibitem{huang} 高等固体力学 @ 黄克智
+    \bibitem{kzb} 非线性连续介质力学@匡震邦
+    \bibitem{abaqus} abaqus
+    \bibitem{bely}  Nonlinear Finite Elements for Continua and Structures @ Belytschko
+\end{thebibliography}
+
+\end{document}

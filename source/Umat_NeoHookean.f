@@ -22,32 +22,18 @@ C     BBARP  - PRINCIPAL VALUES OF BBAR
 C     BBARN  - PRINCIPAL DIRECTION OF BBAR (AND EELAS)
 C     DISTGR - DEVIATORIC DEFORMATION GRADIENT (DISTORTION TENSOR)
 C----------------------------------------------------------------------
-C
+
       DIMENSION EELAS(6), EELASP(3), BBAR(6), BBARP(3), BBARN(3,3),
      1          DISTGR(3,3)
 C
       PARAMETER(ZERO = 0.D0, ONE = 1.D0, TWO = 2.D0, THREE = 3.D0,
      1          FOUR = 4.D0)
-C
-C----------------------------------------------------------------------
-C     UMAT FOR COMPRESSIBLE NEO-HOOKEAN HYPERELASTICITY 
-C     CANNOT BE USED FOR PLANE STRESS
-C----------------------------------------------------------------------
-C     PROPS(1)  - E
-C     PROPS(2)  - NU
-C----------------------------------------------------------------------
-C
-C     ELASTIC PROPERTIES
-C
-c      EMOD = PROPS(1)
-c      ENU  = PROPS(2)
-c      C10  = EMOD / (FOUR * (ONE + ENU))
-c      D1   = 6.0 * (ONE - TWO * ENU) / EMOD
+
+     C     ELASTIC PROPERTIES
       C10  = PROPS(1)
       D1   = PROPS(2)
-C
+
 C     JACOBIAN AND DISTORTION TENSOR
-C
       DET = DFGRD1(1,1) * DFGRD1(2,2) * DFGRD1(3,3)
      1    - DFGRD1(1,2) * DFGRD1(2,1) * DFGRD1(3,3)
 C
@@ -64,9 +50,8 @@ C
           DISTGR(K2,K1) = SCALE * DFGRD1(K2,K1)
         END DO
       END DO
-C
+
 C     CALCULATE LEFT CAUCHY-GREEN TENSOR
-C
       BBAR(1) = DISTGR(1,1)**2 + DISTGR(1,2)**2 + DISTGR(1,3)**2
       BBAR(2) = DISTGR(2,1)**2 + DISTGR(2,2)**2 + DISTGR(2,3)**2
       BBAR(3) = DISTGR(3,3)**2 + DISTGR(3,1)**2 + DISTGR(3,2)**2

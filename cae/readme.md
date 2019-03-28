@@ -1,0 +1,2 @@
+2d_block_compress_neohookean_abaqus.cae
+使用abaqus内置的 Neo-Hookean 本构模型求解二维平面压缩问题，在大约50%左右出现失稳。

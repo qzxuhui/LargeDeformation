@@ -2,3 +2,4 @@
 /document/*.aux
 /document/*.log
 /document/*.gz
+/.vscode

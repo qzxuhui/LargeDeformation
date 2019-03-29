@@ -3,3 +3,4 @@
 /document/*.log
 /document/*.gz
 /.vscode
+*.out

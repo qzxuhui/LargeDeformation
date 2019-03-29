@@ -35,8 +35,8 @@ C----------------------------------------------------------------------
 C     elastic preproties
       C10  = PROPS(1)
       D1   = PROPS(2)
-      mu_0 = PROPS(3)
-      lambda_0 = PROPS(4)
+      mu_0 = 1.D0
+      lambda_0 = 1.D0
       
 C     calculate jacobian det(F)
       DET = DFGRD1(1,1) * DFGRD1(2,2) * DFGRD1(3,3)
@@ -48,8 +48,6 @@ C     calculate jacobian det(F)
      3              - DFGRD1(2,3) * DFGRD1(3,2) * DFGRD1(1,1)
       END IF
 
-
-      
 c     calculate left cauchy-green tensor
       bmat(1) = DFGRD1(1,1)**2 + DFGRD1(1,2)**2 + DFGRD1(1,3)**2
       bmat(2) = DFGRD1(2,1)**2 + DFGRD1(2,2)**2 + DFGRD1(2,3)**2
@@ -86,14 +84,19 @@ C     calculate left cauchy-green tensor's bar (will be no use)
 
 C     calculate cauchy stress
       TRbbar = (bbar(1) + bbar(2) + bbar(3)) / THREE
+      
       EG     = TWO * C10 / DET
       EK     = TWO / D1 * (TWO * DET - ONE)
       PR     = TWO / D1 * (DET - ONE)
+      
+      EGXH   = mu_0 / DET
+      PRXH   = TWO / D1 * LOG(DET)
+      
       DO K1 = 1, NDI
-        STRESS(K1) = EG * (bbar(K1) - TRbbar) + PR
+        STRESS(K1) = EGXH * (bmat(K1) - ONE) + PRXH
       END DO
       DO K1 = NDI+1, NDI+NSHR
-        STRESS(K1) = EG * bbar(K1)
+        STRESS(K1) = EGXH * bmat(K1)
       END DO
      
 C     calculate material jacobian

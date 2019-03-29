@@ -47,7 +47,6 @@ $$\frac{\partial I_3}{\partial \bm{A}}=\bm{A}^{\rm -T}\quad \frac{\partial I_3}{
         \frac{\partial B_{ij}}{\partial F_{kl}} & =\frac{\partial (F_{im}F_{mj}^T)}{\partial F_{kl}}=\frac{\partial (F_{im}F_{jm})}{\partial F_{kl}}
         =\frac{\partial F_{im}}{\partial F_{kl}}F_{jm} +F_{im} \frac{\partial F_{jm}}{\partial F_{kl}}                                               \\
                                                 & =\delta_{ik}\delta_{ml}F_{jm}+\delta_{jk}\delta_{ml}F_{im}                                         \\
-                                                & =\delta_{ik}F_{jl}+\delta_{jk}F_{il}
     \end{aligned}
 \end{equation*}
 $$\frac{\partial \ln J}{\partial F_{kl}}=\frac{1}{J}\frac{\partial J}{\partial F_{kl}}=\frac{1}{J}(JF_{lk}^{-1})=F_{lk}^{-1}$$
@@ -102,17 +101,18 @@ $$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial \tau_{ij}}{\par
 \begin{equation*}
     \begin{aligned}
         \frac{\partial (J\sigma_{ij})}{\partial F_{km}}F_{lm} & =\mu_0(\delta_{ik}F_{jm}F_{lm}+\delta_{jk}F_{im}F_{lm}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm} \\
-                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm}
+                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm}\\
+                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}\delta_{lk}
     \end{aligned}
 \end{equation*}
 同理有
 \begin{equation*}
     \begin{aligned}
-        \frac{\partial (J\sigma_{ij})}{\partial F_{lm}}F_{km} & =\mu_0(\delta_{il}B_{jk}+\delta_{jl}B_{ik}) + \lambda_0\delta_{ij}F_{ml}^{-1}F_{km}
+        \frac{\partial (J\sigma_{ij})}{\partial F_{lm}}F_{km} & =\mu_0(\delta_{il}B_{jk}+\delta_{jl}B_{ik}) + \lambda_0\delta_{ij}\delta_{kl}
     \end{aligned}
 \end{equation*}
 可以得到材料的Jacobian
-$$\mathbb{C}_{ijkl}=\frac{1}{2J}\left(\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}+\delta_{il}B_{jk}+\delta_{jl}B_{ik}) +\lambda_0\delta_{ij}(F_{mk}^{-1}F_{lm}+F_{ml}^{-1}F_{km}) \right)$$
+$$\mathbb{C}_{ijkl}=\frac{\mu_0}{2J}(\delta_{ik}B_{jl}+\delta_{jk}B_{il}+\delta_{il}B_{jk}+\delta_{jl}B_{ik}) +\frac{\lambda_0}{J}\delta_{ij}\delta_{kl}$$
 
 
 
@@ -120,7 +120,7 @@ $$\mathbb{C}_{ijkl}=\frac{1}{2J}\left(\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}+
     \bibitem{huang} 高等固体力学 @ 黄克智
     \bibitem{kzb} 非线性连续介质力学@匡震邦
     \bibitem{abaqus} abaqus
-    \bibitem{bely}  Nonlinear Finite Elements for Continua and Structures @ Belytschko
+    \bibitem{bely}  Nonlinear Finite Elements for Continua and Structures @ Belytschko 
 \end{thebibliography}
 
 \end{document}

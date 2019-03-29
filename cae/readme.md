@@ -4,4 +4,8 @@ the displacement load is 0.5, at t=0.91 (strain almost at 46%) the system genera
 
 2d_block_compress_linear_umat.cae
 using UMAT(Isotropic_Isothermal_Elasticity_UMAT.for) solve plane strain 2D block compress problem.
+result can convergence.
 
+2d_block_compress_abaqus_build_in_neo_hooken_umat_compressible.cae
+using UMAT(neo_hookean_abaqus_compressible_umat.for) solve plane strain 2D block compress problem.
+result can convergence.

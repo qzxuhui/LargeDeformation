@@ -27,7 +27,9 @@ C
 C
       PARAMETER(ZERO = 0.D0, ONE = 1.D0, TWO = 2.D0, THREE = 3.D0,
      1          FOUR = 4.D0)
-C
+      
+      real(8) mu_0
+      real(8) lambda_0
 C----------------------------------------------------------------------
 C     UMAT for compressible Neo-Hookean hyperelastity
 C----------------------------------------------------------------------
@@ -35,8 +37,8 @@ C----------------------------------------------------------------------
 C     elastic preproties
       C10  = PROPS(1)
       D1   = PROPS(2)
-      mu_0 = 1.D0
-      lambda_0 = 1.D0
+      mu_0 = C10 * 2
+      lambda_0 = 1000000.D0
       
 C     calculate jacobian det(F)
       DET = DFGRD1(1,1) * DFGRD1(2,2) * DFGRD1(3,3)
@@ -47,20 +49,6 @@ C     calculate jacobian det(F)
      2              - DFGRD1(1,3) * DFGRD1(3,1) * DFGRD1(2,2)
      3              - DFGRD1(2,3) * DFGRD1(3,2) * DFGRD1(1,1)
       END IF
-
-c     calculate left cauchy-green tensor
-      bmat(1) = DFGRD1(1,1)**2 + DFGRD1(1,2)**2 + DFGRD1(1,3)**2
-      bmat(2) = DFGRD1(2,1)**2 + DFGRD1(2,2)**2 + DFGRD1(2,3)**2
-      bmat(3) = DFGRD1(3,3)**2 + DFGRD1(3,1)**2 + DFGRD1(3,2)**2
-      bmat(4) = DFGRD1(1,1)*DFGRD1(2,1) + DFGRD1(1,2)*DFGRD1(2,2) 
-     1        + DFGRD1(1,3)*DFGRD1(2,3)
-      IF (NSHR .EQ. 3) THEN
-        bmat(5) = DFGRD1(1,1)*DFGRD1(3,1) + DFGRD1(1,2)*DFGRD1(3,2) 
-     1          + DFGRD1(1,3)*DFGRD1(3,3)
-        bmat(6) = DFGRD1(2,1)*DFGRD1(3,1) + DFGRD1(2,2)*DFGRD1(3,2) 
-     1          + DFGRD1(2,3)*DFGRD1(3,3)
-      END IF
-      
 c     calculate distortion tensor (will be no use)
       SCALE = DET**(-ONE /THREE)
       DO K1 = 1, 3
@@ -81,25 +69,42 @@ C     calculate left cauchy-green tensor's bar (will be no use)
         bbar(6) = DISTGR(2,1)*DISTGR(3,1) + DISTGR(2,2)*DISTGR(3,2) 
      1          + DISTGR(2,3)*DISTGR(3,3)
       END IF
-
+      
+c     calculate left cauchy-green tensor
+      bmat(1) = DFGRD1(1,1)**2 + DFGRD1(1,2)**2 + DFGRD1(1,3)**2
+      bmat(2) = DFGRD1(2,1)**2 + DFGRD1(2,2)**2 + DFGRD1(2,3)**2
+      bmat(3) = DFGRD1(3,3)**2 + DFGRD1(3,1)**2 + DFGRD1(3,2)**2
+      bmat(4) = DFGRD1(1,1)*DFGRD1(2,1) + DFGRD1(1,2)*DFGRD1(2,2) 
+     1        + DFGRD1(1,3)*DFGRD1(2,3)
+      IF (NSHR .EQ. 3) THEN
+        bmat(5) = DFGRD1(1,1)*DFGRD1(3,1) + DFGRD1(1,2)*DFGRD1(3,2) 
+     1          + DFGRD1(1,3)*DFGRD1(3,3)
+        bmat(6) = DFGRD1(2,1)*DFGRD1(3,1) + DFGRD1(2,2)*DFGRD1(3,2) 
+     1          + DFGRD1(2,3)*DFGRD1(3,3)
+      END IF
+      
 C     calculate cauchy stress
       TRbbar = (bbar(1) + bbar(2) + bbar(3)) / THREE
-      
       EG     = TWO * C10 / DET
       EK     = TWO / D1 * (TWO * DET - ONE)
       PR     = TWO / D1 * (DET - ONE)
       
       EGXH   = mu_0 / DET
-      PRXH   = TWO / D1 * LOG(DET)
+      PRXH   = lambda_0 * LOG(DET) / DET
+
       
       DO K1 = 1, NDI
+C        STRESS(K1) = EG * (BBAR(K1) - TRBBAR) + PR
         STRESS(K1) = EGXH * (bmat(K1) - ONE) + PRXH
       END DO
       DO K1 = NDI+1, NDI+NSHR
+C        STRESS(K1) = EG * BBAR(K1)
         STRESS(K1) = EGXH * bmat(K1)
       END DO
-     
+            
 C     calculate material jacobian
+      
+      
       EG23 = EG * TWO / THREE
       DDSDDE(1,1) = EG23 * (bbar(1) + TRbbar) + EK
       DDSDDE(2,2) = EG23 * (bbar(2) + TRbbar) + EK
@@ -132,5 +137,3 @@ C     calculate material jacobian
 
       RETURN
       END
-
-    

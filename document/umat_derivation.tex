@@ -8,119 +8,219 @@
 \usepackage{amsmath}
 \usepackage{color}
 
-\title{Neo Hookean UMAT推导}
+\title{Neo Hookean UMAT}
 \author{徐辉}
 \begin{document}
 \maketitle
-\section{符号说明}
-下面列出推导中常用的变量转化关系和符号说明:
-
+\section{理论}
+Abaqus 指标映射关系
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        $(i,j)$ & $a$ \\
+        \hline
+        (1,1)   & 1   \\
+        (2,2)   & 2   \\
+        (3,3)   & 3   \\
+        (1,2)   & 4   \\
+        (1,3)   & 5   \\
+        (2,3)   & 6   \\
+        \hline
+    \end{tabular}
+    \caption{Abaqus 指标映射关系}
+\end{table}
+线性理论的Lame常数: $\lambda_0$和$\mu_0$
+\begin{equation*}
+    \begin{aligned}
+        \lambda & = \lambda_0               \\
+        \mu     & = \mu_0 - \lambda_0 \ln J \\
+    \end{aligned}
+\end{equation*}
 变形梯度
-$$\bm{F}=\frac{\partial \bm{x}}{ \partial \bm{X}}$$
+$$\bm{F}=\frac{\partial \bm{x}}{ \partial \bm{X}}=\left(
+    \begin{array}{ccc}
+            F_{11} & F_{12} & F_{13} \\
+            F_{21} & F_{22} & F_{23} \\
+            F_{31} & F_{32} & F_{33} \\
+        \end{array}
+    \right)$$
 
 左Cauchy Green变形张量
-$$\bm{B}= \bm{F} \cdot \bm{F}^{\rm T}$$
+$$\bm{B}= \bm{F} \cdot \bm{F}^{\rm T}=\left(
+    \begin{array}{ccc}
+            F_{11}^2+F_{12}^2+F_{13}^2 & F_{11}F_{21}+F_{12}F_{22}+F_{13}F_{23} & F_{11}F_{31}+F_{12}F_{32}+F_{13}F_{33} \\
+                                       & F_{21}^2+F_{22}^2+F_{23}^2             & F_{21}F_{31}+F_{22}F_{32}+F_{23}F_{33} \\
+            {\rm sym}                  &                                        & F_{31}^2+F_{32}^2+F_{33}^2             \\
+        \end{array}
+    \right)$$
+\begin{equation*}
+    \begin{aligned}
+        B[1]=B_{11} & =F_{11}^2+F_{12}^2+F_{13}^2             \\
+        B[2]=B_{22} & =F_{21}^2+F_{22}^2+F_{23}^2             \\
+        B[3]=B_{33} & =F_{31}^2+F_{32}^2+F_{33}^2             \\
+        B[4]=B_{12} & =F_{11}F_{21}+F_{12}F_{22}+F_{13}F_{23} \\
+        B[5]=B_{13} & =F_{11}F_{31}+F_{12}F_{32}+F_{13}F_{33} \\
+        B[6]=B_{23} & =F_{21}F_{31}+F_{22}F_{32}+F_{23}F_{33} \\
+    \end{aligned}
+\end{equation*}
 
-右Cauchy Green变形张量
-$$\bm{C}=\bm{F}^{\rm T}\cdot \bm{F}$$
+应变能函数\cite{bely}(5.4.54)
+$$W(\bm{C})= \frac{1}{2}\mu_0({\rm trace}(\bm{C})-3)-\mu_0 \ln J + \frac{1}{2}\lambda_0(\ln J)^2$$
 
-PK-2应力
-$$\bm{S}$$
+
+Kirchhoff应力\cite{bely}(5.4.55)
+$$\bm{\tau}=\lambda_0\ln J\bm{I}+\mu_0(\bm{B}-\bm{I})$$
+
+Cauchy 应力
+$$\bm{\sigma}=\frac{\bm{\tau}}{J}=\frac{\mu_0}{J}\bm{B}-\frac{\mu_0-\lambda_0\ln J}{J}\bm{I}$$
+\begin{equation*}
+    \begin{aligned}
+        \sigma[1]=\sigma_{11} & =\frac{\mu_0}{J}B[1]-\frac{\mu_0-\lambda_0\ln J}{J} \\
+        \sigma[2]=\sigma_{11} & =\frac{\mu_0}{J}B[2]-\frac{\mu_0-\lambda_0\ln J}{J} \\
+        \sigma[3]=\sigma_{11} & =\frac{\mu_0}{J}B[3]-\frac{\mu_0-\lambda_0\ln J}{J} \\
+        \sigma[4]=\sigma_{12} & =\frac{\mu_0}{J}B[4]                                \\
+        \sigma[5]=\sigma_{13} & =\frac{\mu_0}{J}B[5]                                \\
+        \sigma[6]=\sigma_{23} & =\frac{\mu_0}{J}B[6]                                \\
+    \end{aligned}
+\end{equation*}
+
+材料切线刚度可以表示为\cite{bely}(5.4.57)
+\begin{equation*}
+    \mathbb{C}^{\tau}_{ijkl}=\lambda \delta_{ij} \delta_{kl}+\mu(\delta_{ik}\delta_{jl}+\delta_{il}\delta_{kj})
+\end{equation*}
+有切线刚度的转化关系\cite{bely}(5.4.42)(5.4.46)(5.4.51)
+\begin{equation*}
+    \begin{aligned}
+        \mathbb{C}^{SE}_{ijkl}       & =\frac{\partial S_{ij}}{\partial E_{kl}} \\
+        \mathbb{C}^{\tau}_{ijkl}     & =F_{im}F_{jn}F_{kp}F_{lq}C^{SE}_{mnpq}   \\
+        \mathbb{C}^{\sigma T}_{ijkl} & =\frac{1}{J}\mathbb{C}^{\tau}_{ijkl}     \\
+    \end{aligned}
+\end{equation*}
+
+Abaqus切线刚度可以表示\cite{nguy}(36)为
+\begin{equation*}
+    \begin{aligned}
+        {\rm DDSDDE}_{{\color{red}iqph}}= & \frac{1}{J}F_{iM}F_{qI}F_{pK}F_{hL}\frac{\partial S_{MI}}{\partial E_{KL}}+\frac{1}{2}(\sigma_{ip}\delta_{qh}+\sigma_{qh}\delta_{ip}+\sigma_{ih}\delta_{qp}+\sigma_{qp}\delta_{ih}) \\
+    \end{aligned}
+\end{equation*}
+{\color{red} 注意该公式和论文中不同,认为论文中公式存在笔误，不同之处用红色标出。}指标变换并带入材料刚度有
+\begin{equation*}
+    \begin{aligned}
+        {\rm DDSDDE}_{ijkl} & =\mathbb{C}^{\sigma T}_{ijkl} +\frac{1}{2}(\sigma_{ik}\delta_{jl}+\sigma_{jl}\delta_{ik}+\sigma_{il}\delta_{jk}+\sigma_{jk}\delta_{il})                                                                   \\
+                            & =\frac{1}{J}(\lambda \delta_{ij} \delta_{kl}+\mu(\delta_{ik}\delta_{jl}+\delta_{il}\delta_{kj}))+\frac{1}{2}(\sigma_{ik}\delta_{jl}+\sigma_{jl}\delta_{ik}+\sigma_{il}\delta_{jk}+\sigma_{jk}\delta_{il})
+    \end{aligned}
+\end{equation*}
+根据表1，写成矩阵形式有
+\begin{equation}
+\begin{aligned}
+    {\rm DDSDDE}&=\left(
+    \begin{array}{cccccc}
+            (\lambda + 2\mu)/J & \lambda/J          & \lambda/J          & 0     & 0     & 0     \\
+                               & (\lambda + 2\mu)/J & \lambda/J          & 0     & 0     & 0     \\
+                               &                    & (\lambda + 2\mu)/J & 0     & 0     & 0     \\
+                               &                    &                    & \mu/J & 0     & 0     \\
+                               & {\rm sym}          &                    &       & \mu/J & 0     \\
+                               &                    &                    &       &       & \mu/J \\
+        \end{array}
+    \right)\\
+    &+
+    \left(
+    \begin{array}{cccccc}
+            2\sigma[1] & 0            & 0          & \sigma[4]               & \sigma[5]               & 0                       \\
+                       & 2\sigma[2] 0 & 0          & \sigma[4]               & 0                       & \sigma[6]               \\
+                       &              & 2\sigma[3] & 0                       & \sigma[5]               & \sigma[6]               \\
+                       &              &            & (\sigma[1]+\sigma[2])/2 & \sigma[6]/2             & \sigma[5]/2             \\
+                       & {\rm sym}    &            &                         & (\sigma[1]+\sigma[3])/2 & \sigma[4]/2             \\
+                       &              &            &                         &                         & (\sigma[2]+\sigma[3])/2 \\
+        \end{array}
+    \right)
+\end{aligned}
+\label{mmme}
+\end{equation}
+
+\section{数值模拟}
+对如下问题进行数值模拟。
+
+平面应变问题，一个1x1的块体两侧受压，边界条件为位移载荷。左侧为0.25，右侧为-0.25。
+
+材料参数$\mu_0=2$,$\lambda_0=1000000$
+
+
+\subsection{理论解}
+变形梯度：
+\begin{equation*}
+    \bm{F}=\left(
+    \begin{array}{ccc}
+            0.5 & 0 & 0 \\
+            0   & 2 & 0 \\
+            0   & 0 & 1 \\
+        \end{array}
+    \right)
+\end{equation*}
+
+左Cauchy-Green变形张量:
+\begin{equation*}
+    \bm{B}=\bm{F}\cdot\bm{F}^{\rm T}=\left(
+    \begin{array}{ccc}
+            0.25 & 0 & 0 \\
+            0    & 4 & 0 \\
+            0    & 0 & 1 \\
+        \end{array}
+    \right)
+\end{equation*}
 
 Cauchy应力
-$$\bm{\sigma}=\frac{1}{J}\bm{F}\cdot \bm{S} \cdot \bm{F}^{\rm T}$$
-
-Kirchhoff应力
-$$\bm{\tau}=J\bm{\sigma}$$
-材料的Jacobian满足
-$$\delta(J\bm{\sigma})=J\mathbb{C}\cdot \delta \bm{D}$$
-
-虚变形率
-$$\delta \bm{D}={\rm sym}(\delta \bm{F}\cdot \bm{F}^{-1})$$
-
-不变量求导
-$$\frac{\partial I_3}{\partial \bm{A}}=\bm{A}^{\rm -T}\quad \frac{\partial I_3}{\partial A_{ij}}=I_3 A_{ji}^{-1}$$
-
-\section{基本推导}
 \begin{equation*}
-    \begin{aligned}
-        \frac{\partial B_{ij}}{\partial F_{kl}} & =\frac{\partial (F_{im}F_{mj}^T)}{\partial F_{kl}}=\frac{\partial (F_{im}F_{jm})}{\partial F_{kl}}
-        =\frac{\partial F_{im}}{\partial F_{kl}}F_{jm} +F_{im} \frac{\partial F_{jm}}{\partial F_{kl}}                                               \\
-                                                & =\delta_{ik}\delta_{ml}F_{jm}+\delta_{jk}\delta_{ml}F_{im}                                         \\
-    \end{aligned}
+    \bm{\sigma}=-p\bm{I}+2\left(\frac{\partial W}{\partial I}\bm{B}\right)=\mu_0\bm{B}-p\bm{I}=\mu_0\left(
+    \begin{array}{ccc}
+            0.25-p & 0   & 0   \\
+            0      & 4-p & 0   \\
+            0      & 0   & 1-p \\
+        \end{array}
+    \right)
 \end{equation*}
-$$\frac{\partial \ln J}{\partial F_{kl}}=\frac{1}{J}\frac{\partial J}{\partial F_{kl}}=\frac{1}{J}(JF_{lk}^{-1})=F_{lk}^{-1}$$
-\section{材料Jacobian}
-
-虚变形率表达式带入到材料的Jacobian中，写成分量形式有
-$$\delta(J\sigma_{ij})=J \mathbb{C}_{ijkl}\ {\rm sym} (\delta F_{km}F_{ml}^{-1})$$
-在计算$\mathbb{C}$的时候，需要对变形率进行求导。首先暂时忽略$\delta \bm{D}$的对称性，然后将计算结果对称化保证对称性。先暂时忽略对称性，有
-$$\delta(J\sigma_{ij})=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}$$
-进行如下操作(??)
+根据边界条件
 \begin{equation*}
-    \begin{aligned}
-        \delta(J\sigma_{ij})&=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}             \\
-        \delta(J\sigma_{ij})F_{lp}&=J \mathbb{C}_{ijkl} \delta F_{km}F_{ml}^{-1}F_{lp} \\
-        \delta(J\sigma_{ij})F_{lp}&=J \mathbb{C}_{ijkl} \delta F_{km}\delta_{mp}             \\
-        \delta(J\sigma_{ij})F_{lm}&=J \mathbb{C}_{ijkl} \delta F_{km}                  \\
-    \end{aligned}
+    \sigma_{22}=0 \quad \Rightarrow \quad p=4
 \end{equation*}
-移项有
-$$\mathbb{C}_{ijkl}=\frac{1}{J}\frac{\partial(J\sigma_{ij})}{\partial F_{km}}F_{lm}$$
-强制保证$\mathbb{C}$的对称性，有
-$$\mathbb{C}_{ijkl}=\frac{1}{2J}\left(\frac{\partial(J\sigma_{ij})}{\partial F_{km}}F_{lm} + \frac{\partial(J\sigma_{ij})}{\partial F_{lm}}F_{km} \right)$$
-
-\section{Abaqus Neo-Hookean模型推导}
-
-Abaqus超弹性neo-hookean模型应变能函数\cite{abaqus}
-$$U=C_{10}(\bar{I}_1-3)+\frac{1}{D_1}(J-1)^2$$
-Cauchy应力为
-$$\sigma_{ij}=\frac{2}{J}C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})+\frac{2}{D_1}(J-1)\delta_{ij}$$
-因此
-$$J\sigma_{ij}=2C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})+\frac{2}{D_1}(J^2-J)\delta_{ij}$$
-
-计算第一部分
-$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial}{\partial F_{km}}\left(2C_{10}(\bar{B}_{ij}-\frac{1}{3}\delta_{ij}\bar{B}_{kk})\right)=\cdots$$
-
-计算第二部分
-$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial}{\partial F_{km}}\left(\frac{2}{D_1}(J^2-J)\delta_{ij}\right)=\cdots$$
-
-\section{分子链 Neo-Hookean模型推导}
-基于分子链模型应变能函数
-$$U=\frac{1}{2}\mu_0({\rm trace}(\bm{C})-3)-\mu_0 \ln J+\frac{1}{2}\lambda_0(\ln J)^2$$
-Kirchhoff应力为\cite{bely}(5.4.55)\cite{huang}(3.3.29)
-$$\bm{\tau}=\mu_0(\bm{B}-\bm{I}) + \lambda_0 \ln J \bm{I}$$
-写作分量形式为
-$$\tau_{ij}=\mu_0(B_{ij}-\delta_{ij}) + \lambda_0 \ln J \delta_{ij}$$
-Cauchy应力为
-$$\bm{\sigma}=\frac{\tau}{J}=\frac{\mu_0}{J}(\bm{B}-\bm{I}) + \frac{\lambda_0}{J} \ln J \bm{I}$$
-写作分量形式为
-$$\sigma_{ij}=\frac{\mu_0}{J}(B_{ij}-\delta_{ij}) + \frac{\lambda_0}{J} \ln J \delta_{ij}$$
-计算材料的Jacobian
-$$\frac{\partial (J\sigma_{ij})}{\partial F_{km}}=\frac{\partial \tau_{ij}}{\partial F_{km}}=\mu_0(\delta_{ik}F_{jm}+\delta_{jk}F_{im}) + \lambda_0\delta_{ij}F_{mk}^{-1}$$
+因此Cauchy应力
 \begin{equation*}
-    \begin{aligned}
-        \frac{\partial (J\sigma_{ij})}{\partial F_{km}}F_{lm} & =\mu_0(\delta_{ik}F_{jm}F_{lm}+\delta_{jk}F_{im}F_{lm}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm} \\
-                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}F_{mk}^{-1}F_{lm}\\
-                                                              & =\mu_0(\delta_{ik}B_{jl}+\delta_{jk}B_{il}) + \lambda_0\delta_{ij}\delta_{lk}
-    \end{aligned}
+    \bm{\sigma}=-p\bm{I}+2\left(\frac{\partial W}{\partial I}\bm{B}\right)=\mu_0\bm{B}-p\bm{I}=\mu_0\left(
+    \begin{array}{ccc}
+            -3.75 & 0 & 0  \\
+            0     & 0 & 0  \\
+            0     & 0 & -3 \\
+        \end{array}
+    \right)
+    =\left(
+    \begin{array}{ccc}
+            -7.5 & 0 & 0  \\
+            0    & 0 & 0  \\
+            0    & 0 & -6 \\
+        \end{array}
+    \right)
 \end{equation*}
-同理有
-\begin{equation*}
-    \begin{aligned}
-        \frac{\partial (J\sigma_{ij})}{\partial F_{lm}}F_{km} & =\mu_0(\delta_{il}B_{jk}+\delta_{jl}B_{ik}) + \lambda_0\delta_{ij}\delta_{kl}
-    \end{aligned}
-\end{equation*}
-可以得到材料的Jacobian
-$$\mathbb{C}_{ijkl}=\frac{\mu_0}{2J}(\delta_{ik}B_{jl}+\delta_{jk}B_{il}+\delta_{il}B_{jk}+\delta_{jl}B_{ik}) +\frac{\lambda_0}{J}\delta_{ij}\delta_{kl}$$
 
+\subsection{模拟结果}
 
+\subsubsection{使用$\mu$}
+在公式(\ref{mmme})中，直接使用$\mu$。即不作修改，直接使用公式(\ref{mmme})。
+
+数值模拟应力大小和解析结果相同。
+
+第一个负特征值出现在增量步94，时间0.8358，名义应变大约为$0.5 \times 0.8358/1=41.79\%$。
+
+\subsubsection{使用$\mu_0$}
+在切线刚度的部分就认为材料不可压缩，即在公式(\ref{mmme})中，使用$\mu_0$，$\mu$出现的的地方使用$\mu_0$代替。
+
+第一个负特征值出现在增量步10，时间0.00758, 名义应变大约为$0.5 \times 0.00758/1=0.00379\%$。
+
+在增量步54，时间0.3877，名义应变大约为$0.5 \times 0.3877/1=19\%$时计算不收敛。
 
 \begin{thebibliography}{1}
-    \bibitem{huang} 高等固体力学 @ 黄克智
-    \bibitem{kzb} 非线性连续介质力学@匡震邦
-    \bibitem{abaqus} abaqus
-    \bibitem{bely}  Nonlinear Finite Elements for Continua and Structures @ Belytschko 
+    \bibitem{bely}  Nonlinear Finite Elements for Continua and Structures @ Belytschko
+    \bibitem{nguy} Nguyen N , Waas A M . Nonlinear, finite deformation, finite element analysis[J]. Zeitschrift Für Angewandte Mathematik Und Physik, 2016, 67(3):35.
 \end{thebibliography}
 
 \end{document}
